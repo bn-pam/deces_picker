@@ -1,18 +1,13 @@
-import re
-import json
-import pandas as pd
-import logging
-from dotenv import load_dotenv
-from config import FILE, DOWNLOAD_DIR, PROCESSED_DIR
+import re, json, pandas as pd, logging
+from config import DOWNLOAD_DIR, PROCESSED_DIR
 
 logging.basicConfig(level=logging.INFO)  # Configurer le logging pour afficher les messages INFO
 
-load_dotenv()
-FILE = FILE # Nom du fichier à traiter
-DOWNLOAD_DIR = DOWNLOAD_DIR # Dossier de téléchargement
-FILE_PATH = DOWNLOAD_DIR + '/' + FILE # Chemin du fichier à traiter
-PROCESSED_DIR = PROCESSED_DIR
+# FILE = FILE # Nom du fichier à traiter (si renseigné manuellement dans config.py)
 
+#FILE = get_lastfile_name() # Récupérer le nom du dernier fichier téléchargé
+#DOWNLOAD_DIR = DOWNLOAD_DIR # Dossier de téléchargement
+PROCESSED_DIR = PROCESSED_DIR
 
 # Une regex qui capture tous les champs principaux
 pattern = re.compile(
@@ -35,7 +30,7 @@ pattern = re.compile(
     re.VERBOSE
 )
 
-def extract_data_from_file():
+def extract_data_from_file(FILE_PATH): # extraire les données du fichier source
     data_list = []  # initialisation de la liste des données
     with open(file=FILE_PATH, mode="r", encoding="utf-8") as fichier: # ouvrir et lire le fichier
         for ligne in fichier: # pour chaque ligne dans le fichier
@@ -137,32 +132,12 @@ def json_to_csv(json_data, csv_file_path):
     df.to_csv(csv_file_path, index=False)
     logging.info(f"✅ Converti en CSV : {csv_file_path}")
 
-def get_previous_month(current_month): # Fonction pour obtenir le mois précédent
-  months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-            "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"] # Liste des mois
-  try:
-    index = months.index(current_month) # Récupérer l'index du mois actuel
-    if index == 0: # Si Janvier
-      previous_month = months[11]  # Retourner Décembre si Janvier (car Janvier est le premier mois)
-    else:
-      previous_month = months[index - 1] # Retourner le mois précédent
-    return previous_month
-  except ValueError:
-    return None  # Mois invalide
-
-def get_current_month(): # Fonction pour obtenir le mois actuel
-    import datetime
-    current_month = datetime.datetime.now().strftime("%B") # Récupérer le mois actuel
-    return current_month
-
-def pipeline():
-    data_list = extract_data_from_file() # extraire les données du fichier source et les stocker dans une liste
+def pipeline(FILE, FILE_PATH):
+    data_list = extract_data_from_file(FILE_PATH) # extraire les données du fichier source et les stocker dans une liste
     download_datas(data_list, FILE) # télécharger les données de la liste dans un fichier JSON et retourner le chemin du fichier
     count_lines(data_list, FILE_PATH) # compter les lignes dans les fichiers source et JSON, les lignes non prises en charge et les lignes avec des valeurs nulles
     json_to_csv(data_list, FILE_PATH) # convertir le fichier JSON en fichier CSV
 
-if __name__ == "__main__":
-    pipeline() # Appeler la fonction principale
 
 # Remarques
 # les codes INSEE sont interprétés comme des codes postaux

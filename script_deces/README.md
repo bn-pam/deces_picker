@@ -1,4 +1,4 @@
-## Projet ETL, source 1 : Récupération de fichiers mensuel des décès, avec beautifulsoup
+## Projet ETL, source 1 : Récupération de fichiers mensuel des décès, avec scrapy
 
 ### --- choix de la solution de scraping ---
 
@@ -84,9 +84,17 @@ décès, et pour chacun le programme :
 | Acte_deces    | 	Date                                                                          | 	Acte de décès si applicable         |
 
 
+>> versionning :
+```
+Version 1.2 (actuelle) :
+```
+- feat/extract_last_file : le dernier fichier à télécharger doit correspondre au mois précédent et c'est le seul fichier à télécharger
+le programme reprend également les features de la version 1.1 (pattern de nom de fichier, logging, etc.)
+il est toujours possible d'accéder à la fonction extract_all_files en l'appelant
 
+
+```
 Version 1.1 :
 ```
 logging.info remplace les prints
 --> pour faciliter l'analyse des erreurs grâce aux logs
-```
