@@ -1,8 +1,11 @@
 import re
 import json
 import pandas as pd
+import logging
 from dotenv import load_dotenv
 from config import FILE, DOWNLOAD_DIR, PROCESSED_DIR
+
+logging.basicConfig(level=logging.INFO)  # Configurer le logging pour afficher les messages INFO
 
 load_dotenv()
 FILE = FILE # Nom du fichier à traiter
@@ -93,7 +96,7 @@ def extract_data_from_file():
 
                 #print("ligne bien copiée:", ligne)  # afficher la ligne réécrite
             else:
-                print(f"⚠️ Ligne non prise en charge : {ligne}") # afficher un message si la ligne ne correspond pas au pattern
+                logging.info(f"⚠️ Ligne non prise en charge : {ligne}") # afficher un message si la ligne ne correspond pas au pattern
         #print(f"Nombre de lignes prises en charge : {len(data_list)}") # afficher le nombre de lignes traitées
         return data_list # retourner la liste des données sous forme de liste
 
@@ -105,7 +108,7 @@ def download_datas(data_list, source_file_name): # fonction pour télécharger l
     json_file_path = DOWNLOAD_DIR + '/' + json_file_name  # définir le chemin du fichier JSON
     with open(json_file_path, "w", encoding="utf-8") as f:  # ouvrir le fichier en mode texte
         json.dump(data_list, f, ensure_ascii=False, indent=4)  # écrire les données au format JSON
-    print(f"✅ Téléchargé : {json_file_path}")  # afficher un message de succès
+    logging.info(f"✅ Téléchargé : {json_file_path}")  # afficher un message de succès
     return json_file_path  # retourner le chemin du fichier JSON
 
 def count_lines(data_list, source_file_path):
@@ -114,11 +117,11 @@ def count_lines(data_list, source_file_path):
         count = sum(1 for line in file) # Compter le nombre de lignes dans le fichier source
         lines_omit = count - count_data # Calculer le nombre de lignes non prises en charge
         count_null = sum(1 for data in data_list if any(value is None or value == "null" for value in data.values()))
-        print(f"Nombre de lignes dans le fichier source {source_file_path} : {count}")
-        print(f"Nombre de lignes traitées : {count_data}")
-        print(f"Nombre de lignes non prises en charge : {lines_omit}")
-        print(f"nombre de lignes avec une valeur null : {count_null}")
-        print(f"pourcentage non pris en charge: {lines_omit/count * 100:.2f}%")
+        logging.info(f"Nombre de lignes dans le fichier source {source_file_path} : {count}")
+        logging.info(f"Nombre de lignes traitées : {count_data}")
+        logging.info(f"Nombre de lignes non prises en charge : {lines_omit}")
+        logging.info(f"nombre de lignes avec une valeur null : {count_null}")
+        logging.info(f"pourcentage non pris en charge: {lines_omit/count * 100:.2f}%")
 
 
 def json_to_csv(json_data, csv_file_path):
@@ -132,10 +135,26 @@ def json_to_csv(json_data, csv_file_path):
     csv_file_path = DOWNLOAD_DIR + '/' + csv_file_path
     df = pd.DataFrame(json_data)
     df.to_csv(csv_file_path, index=False)
-    print(f"✅ Converti en CSV : {csv_file_path}")
+    logging.info(f"✅ Converti en CSV : {csv_file_path}")
 
+def get_previous_month(current_month): # Fonction pour obtenir le mois précédent
+  months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+            "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"] # Liste des mois
+  try:
+    index = months.index(current_month) # Récupérer l'index du mois actuel
+    if index == 0: # Si Janvier
+      previous_month = months[11]  # Retourner Décembre si Janvier (car Janvier est le premier mois)
+    else:
+      previous_month = months[index - 1] # Retourner le mois précédent
+    return previous_month
+  except ValueError:
+    return None  # Mois invalide
 
-# Exemple d'utilisation
+def get_current_month(): # Fonction pour obtenir le mois actuel
+    import datetime
+    current_month = datetime.datetime.now().strftime("%B") # Récupérer le mois actuel
+    return current_month
+
 def pipeline():
     data_list = extract_data_from_file() # extraire les données du fichier source et les stocker dans une liste
     download_datas(data_list, FILE) # télécharger les données de la liste dans un fichier JSON et retourner le chemin du fichier

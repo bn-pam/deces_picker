@@ -4,8 +4,10 @@ import os
 import re
 from dotenv import load_dotenv
 from config import DOWNLOAD_DIR, HISTORY_FILE, CHUNK_SIZE, URL, PATTERN
+import logging
 
-load_dotenv()
+load_dotenv() # Charger les variables d'environnement
+logging.basicConfig(level=logging.INFO) # Configurer le logging pour afficher les messages INFO
 
 # URL de la page contenant les fichiers
 URL = URL
@@ -43,9 +45,9 @@ def download_file(url, file_name): # Télécharger un fichier et l'enregistrer l
         with open(file_path, "wb") as file: # ouvrir le fichier en mode écriture binaire
             for chunk in response.iter_content(CHUNK_SIZE): # itérer sur les chunks de 1024 octets
                 file.write(chunk) # écrire chaque chunk dans le fichier
-        print(f"✅ Téléchargé : {file_name}") # afficher un message de succès
+        logging.info(f"✅ Téléchargé : {file_name}") # afficher un message de succès
     else:
-        print(f"❌ Erreur {response.status_code} pour {url}") # afficher un message d'erreur
+        logging.info(f"❌ Erreur {response.status_code} pour {url}") # afficher un message d'erreur
 
 def extract_data(): # Fonction principale pour scraper la page et télécharger les fichiers
     """Scrape la page, télécharge les nouveaux fichiers et met à jour l'historique."""
@@ -63,7 +65,7 @@ def extract_data(): # Fonction principale pour scraper la page et télécharger 
             full_url = file_url if file_url.startswith("http") else f"https://www.data.gouv.fr{file_url}" # construire l'URL complète
 
             if full_url in downloaded_files: # Vérifier si le fichier a déjà été traité
-                print(f"🔄 Déjà téléchargé : {full_url}") # afficher un message de statut
+                logging.info(f"🔄 Déjà téléchargé : {full_url}") # afficher un message de statut
             else:
                 file_name = file_url.split("/")[-1]  # Extraire le nom du fichier
                 download_file(full_url, file_name) # Télécharger le fichier

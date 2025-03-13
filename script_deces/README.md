@@ -82,3 +82,11 @@ décès, et pour chacun le programme :
 | Date_deces    | 	Date                                                                          | 	Date de décès                       |
 | Lieu_deces    | 	VARCHAR(255)                                                                  | 	Lieu de décès                       |   
 | Acte_deces    | 	Date                                                                          | 	Acte de décès si applicable         |
+
+
+
+Version 1.1 :
+```
+logging.info remplace les prints
+--> pour faciliter l'analyse des erreurs grâce aux logs
+```
