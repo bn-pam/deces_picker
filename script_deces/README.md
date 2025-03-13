@@ -1,4 +1,4 @@
-## Projet ETL, source 1 : Récupération de fichiers mensuel des décès, avec scrapy
+## Projet ETL, source 1 : Récupération de fichiers mensuel des décès, avec beautifulsoup
 
 ### --- choix de la solution de scraping ---
 
